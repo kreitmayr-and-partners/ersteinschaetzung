@@ -15,11 +15,11 @@
    false = Produktiv: echtes Senden über window.parent.postMessage.
    FÜR DIE FINALE VERSION NUR DIESE EINE ZEILE AUF false SETZEN:
    ===================================================================== */
-var KP_TESTMODUS = true;
+var KP_TESTMODUS = false;
 /* GitHub-Pages-Fassung (v18.2-gh):
    KP_WEBHOOK  = Adresse des Webhooks, der Leads in Close anlegt. Leer = wie bisher per postMessage an die Wix-Seite.
    KP_REG_BASE = Ort der Regionsdateien reg-de/at/ch.json; './' = gleicher Ordner wie diese Datei. */
-var KP_WEBHOOK = '';
+var KP_WEBHOOK = 'https://kp-leads.office-8ef.workers.dev/';   /* z. B. 'https://kp-leads.DEINNAME.workers.dev' */
 window.KP_REG_BASE = './';
 var KP_T0 = Date.now();
 /* Versand: mit Webhook per fetch, sonst postMessage. Erstabsenden wartet auf {ok:true} und meldet das Ergebnis wie bisher als kp-lead-result. */
@@ -31,6 +31,9 @@ function kpSend(m){
    .then(function(j){if(lead)dispatchEvent(new MessageEvent('message',{data:{type:'kp-lead-result',id:m.id,ok:!!(j&&j.ok)}}))})
    .catch(function(){if(lead)dispatchEvent(new MessageEvent('message',{data:{type:'kp-lead-result',id:m.id,ok:false}}))})}catch(e){}
 }
+/* Sicherung: ohne gültige Webhook-Adresse und ohne Wix-Seite drumherum bleibt der Testmodus an – so kann nie eine Anfrage ins Leere gehen. */
+if(!/^https:\/\//.test(KP_WEBHOOK))KP_WEBHOOK='';
+if(!KP_TESTMODUS&&!KP_WEBHOOK&&window.parent===window){KP_TESTMODUS=true;try{console.warn('KP: keine Webhook-Adresse eingetragen – Testmodus bleibt aktiv.')}catch(e){}}
 </script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Exklusivitäts-Check – Kreitmayr &amp; Partners</title>
@@ -3287,6 +3290,22 @@ var KP_PERSON=(function(){var i=null;try{i=sessionStorage.getItem('kpPerson')}ca
 function fail(t){clearTimeout(timer);reqId='';setBusy(false);msg(t)}
 addEventListener('message',function(e){var m=e.data;if(!m||m.type!=='kp-lead-result'||!reqId||m.id!==reqId)return;clearTimeout(timer);reqId='';
  if(m.ok){LEAD=m.id;doneTexte();busy=false;ev('submit',{pfad:result&&result.pfad||'',potenzial:result&&result.potenzial||'',paket:result&&result.paket||''});done=true;show('done')}else fail('Die Übermittlung hat leider nicht geklappt. Bitte versuchen Sie es erneut.')});
+/* v18.2-gh: Ländervorwahl passend vorwählen – zuerst nach der Handynummer (AT 06…, DE 015/016/017…, CH 075–079), dann nach der Endung der E-Mail-Domain (.at/.ch/.li/.de),
+   sonst nach der gewählten Region (nur ein Land gewählt). Nicht, wenn der Besucher die Vorwahl selbst geändert
+   oder eine Vorwahl ins Feld getippt hat. */
+var telManuell=false;
+function telLand(){try{var sl=$('telL'),t=$('tel');if(!sl||telManuell||/^\s*(\+|00)/.test(t.value||''))return;
+ var em=($('email').value||'').trim().toLowerCase(),tld=(/\.([a-z]{2,})$/.exec(em.split('@')[1]||'')||[])[1],v=null;
+ /* 1) Handynummer verrät das Land: AT 06xx, DE 015x/016x/017x, CH 075–079 (mit oder ohne führende 0) */
+ var nr=(t.value||'').replace(/[\s\/().-]/g,'');
+ if(/^0?6[5-9]\d{4,}/.test(nr))v='+43';else if(/^0?1[5-7]\d{5,}/.test(nr))v='+49';else if(/^0?7[5-9]\d{5,}/.test(nr))v='+41';
+ /* 2) sonst Endung der E-Mail-Domain */
+ if(!v)v={at:'+43',ch:'+41',li:'+423',de:'+49',lu:'+352'}[tld]||null;
+ if(!v){var R=[].concat(ans.region||[]);if(R.length===1)v={'Österreich':'+43','Schweiz':'+41','Deutschland':'+49'}[R[0]]||null}
+ if(v&&[].some.call(sl.options,function(o){return o.value===v}))sl.value=v}catch(e){}}
+$('telL').addEventListener('change',function(){telManuell=true});
+$('email').addEventListener('input',telLand);$('email').addEventListener('blur',telLand);$('tel').addEventListener('input',telLand);$('tel').addEventListener('blur',telLand);
+(function(){var k=d.querySelector('[data-id="kontakt"]');if(!k||!window.MutationObserver)return;new MutationObserver(function(){if(k.classList.contains('act'))telLand()}).observe(k,{attributes:true,attributeFilter:['class']})})();
 /* v9.3: Telefon – Standard Deutschland (+49); Vorwahl im Feld (+43, 0041 …) wählt das Land automatisch */
 function telAuto(){var i=$('tel'),v=i.value;if(/^\s/.test(v)){i.value=v.replace(/^\s+/,'');return}var m=/^\s*(?:\+|00)\s?(\d{1,3})/.exec(v),sl=$('telL');if(!m)return;
  var o=[].filter.call(sl.options,function(o){return m[1].indexOf(o.value.slice(1))===0}).sort(function(a,b){return b.value.length-a.value.length})[0];if(!o)return;
