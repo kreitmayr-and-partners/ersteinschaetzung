@@ -223,10 +223,10 @@ input[type=range]:focus-visible{outline:2px solid var(--o);outline-offset:2px}
 .card.intro-on .kicker{visibility:hidden}
 .igrid svg{position:absolute;inset:0;width:100%;height:100%}
 .igrid polygon{fill:none;stroke:#1d3049;stroke-width:1;transform-box:fill-box;transform-origin:center;transition:stroke .18s var(--ez) var(--fd,.18s) var(--ez),opacity .18s var(--ez) var(--fd,.18s) var(--ez)}
-.card.wv .igrid polygon{animation:lift 1s cubic-bezier(.4,0,.2,1) var(--wd) both}
+.card.wv .igrid polygon.w{animation:lift 1s cubic-bezier(.4,0,.2,1) var(--wd) both}
 @keyframes lift{0%,45%,100%{transform:none}18%{transform:scale(1.15);stroke:var(--pk,#e66208)}}
 .card.open .igrid polygon{animation:none;stroke:#ff8a33;opacity:.9!important}
-.card.open .igrid svg{filter:drop-shadow(0 0 3px rgba(255,107,0,.55))}
+.card.open .igrid svg{filter:none}
 .card.intro-on .top{visibility:hidden;opacity:0}
 .top{transition:opacity .32s var(--ez)}
 .card.open .igrid{opacity:0;transition:opacity .32s var(--ez) .3s}
@@ -1016,7 +1016,7 @@ h2 .hq{transition:color .32s var(--ez)}h2 .hq.on{color:var(--o)}
 <style>/* A3: Glow in Wabenkanten + weiche Raender */
 .igrid polygon{stroke:var(--bs,#1d3049)}
 .igrid,.ivig{-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.55) 2.5%,#000 6%,#000 94%,rgba(0,0,0,.55) 97.5%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.55) 2.5%,#000 6%,#000 94%,rgba(0,0,0,.55) 97.5%,transparent 100%);}
-html:has(.card.intro-on),body:has(.card.intro-on){background:#0B1521}
+html.kp-intro,html.kp-intro body{background:#0B1521}
 .card.intro-on{border-color:transparent;box-shadow:none;transition:border-color .32s var(--ez),box-shadow .32s var(--ez)}
 </style>
 <style>/* A4: Weiter mit Glow/Schatten aus Variante B */
@@ -1031,7 +1031,7 @@ html:has(.card.intro-on),body:has(.card.intro-on){background:#0B1521}
 <style>/* A5-Glowtest: gemeinsamer Cursor-Glow */
 @property --hg{syntax:"<number>";inherits:true;initial-value:0}
 @property --g{syntax:"<number>";inherits:true;initial-value:0}
-:root{--cx:-999px;--cy:-999px;transition:--hg .32s var(--ez)}
+:root{--cx:-999px;--cy:-999px}
 .tile,.box{position:relative;isolation:isolate;--mx:50%;--my:50%}
 .tile::after,.box::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background:radial-gradient(200px circle at var(--mx) var(--my),rgba(255,107,0,.22),rgba(255,107,0,.07) 45%,transparent 70%);opacity:var(--g);transition:opacity .32s var(--ez)}
 /* orange CSS-Sechsecke: Licht am Cursor, per clip-path auf Form beschnitten */
@@ -1046,14 +1046,17 @@ h2 em{--mx:-999px;--my:-999px;background:radial-gradient(90px circle at var(--mx
 <script>addEventListener('DOMContentLoaded',function(){var R=document.documentElement,rm=matchMedia('(prefers-reduced-motion: reduce)').matches,co=matchMedia('(pointer: coarse)').matches,cur=null,S='.tile,.box,#next,h2 em',set=function(e,k,v){e.style.setProperty(k,v)};
 var G='<stop class="c" offset="0"/><stop class="m" offset=".45"/><stop offset="1"/>';document.body.insertAdjacentHTML('beforeend','<svg id="kpG" width="0" height="0" style="position:absolute" aria-hidden="true"><radialGradient id="kpGc" gradientUnits="userSpaceOnUse" r="14">'+G+'</radialGradient><radialGradient id="kpGh" r=".9">'+G+'</radialGradient></svg>');
 var gc=document.getElementById('kpGc'),gh=document.getElementById('kpGh'),cb=document.getElementById('comb');
-function at(e){var x=e.clientX,y=e.clientY,el=e.target.closest&&e.target.closest(S);set(R,'--cx',x+'px');set(R,'--cy',y+'px');
+/* Leistung: Cursor-Variablen nur am aktiven Schritt, an der Kopfzeile und der Fußleiste setzen statt am <html> – sonst berechnet der Browser bei jeder Mausbewegung alle Elemente neu */
+function tg(){return [document.querySelector('.step.act'),document.querySelector('.card>.top'),document.getElementById('foot')].filter(Boolean)}
+var HG=0;function hg(v){if(v===HG)return;HG=v;tg().forEach(function(t){set(t,'--hg',v)});R.classList.toggle('kpg',v>0)}
+function at(e){var x=e.clientX,y=e.clientY,el=e.target.closest&&e.target.closest(S);tg().forEach(function(t){set(t,'--cx',x+'px');set(t,'--cy',y+'px');if(HG)set(t,'--hg',HG)});
  if(cb){var m=cb.getScreenCTM();if(m&&m.a){var p=new DOMPoint(x,y).matrixTransform(m.inverse());gc.setAttribute('cx',p.x);gc.setAttribute('cy',p.y)}}
  if(cur&&cur!==el)set(cur,'--g',0);cur=el;if(!el)return el;var r=el.getBoundingClientRect(),mx=x-r.left,my=y-r.top;
  if(el.tagName==='EM'){var rs=el.getClientRects(),o=0;for(var i=0;i<rs.length;i++){if(y<rs[i].bottom||i===rs.length-1){mx=o+x-rs[i].left;my=y-rs[i].top;break}o+=rs[i].width}}
  var h=el.querySelector&&el.querySelector('.hx');if(h){var q=h.getBoundingClientRect();if(q.width){gh.setAttribute('cx',(x-q.left)/q.width);gh.setAttribute('cy',(y-q.top)/q.height)}}
  set(el,'--mx',mx+'px');set(el,'--my',my+'px');set(el,'--g',1);return el}
-if(!co){addEventListener('pointermove',function(e){at(e);set(R,'--hg',1);R.classList.add('kpg')});R.addEventListener('pointerleave',function(){set(R,'--hg',0);R.classList.remove('kpg');if(cur)set(cur,'--g',0);cur=null})}
-else addEventListener('pointerdown',function(e){if(rm)return;var el=at(e);set(R,'--hg',1);R.classList.add('kpg');setTimeout(function(){set(R,'--hg',0);R.classList.remove('kpg');if(el)set(el,'--g',0)},650);
+if(!co){var pe=null,pr=0;addEventListener('pointermove',function(e){pe=e;if(pr)return;pr=requestAnimationFrame(function(){pr=0;hg(1);at(pe)})});R.addEventListener('pointerleave',function(){hg(0);if(cur)set(cur,'--g',0);cur=null})}
+else addEventListener('pointerdown',function(e){if(rm)return;var el=e.target.closest&&e.target.closest('#next');   /* Touch: kein Cursor-Licht (hat bei jedem Tippen alle Elemente neu berechnen lassen), nur die Welle am Weiter-Button */
  if(el&&el.id==='next'&&el.getAttribute('aria-disabled')!=='true'){var r=el.getBoundingClientRect(),p=document.createElement('span');p.className='kp-ripple';p.style.left=(e.clientX-r.left)+'px';p.style.top=(e.clientY-r.top)+'px';el.appendChild(p);p.addEventListener('animationend',function(){p.remove()})}})});</script>
 <style>/* A6: Glow in Transitions */
 @property --mx{syntax:"<length-percentage>";inherits:true;initial-value:50%}
@@ -1169,6 +1172,10 @@ svg.rdo path{fill:#ff6b00;stroke:#ff6b00;stroke-width:2;filter:none}svg.rdo{filt
 .comb .goal polygon:not(.on){animation:cgoal 2.4s var(--ez) infinite}
 @keyframes cgoal{0%,100%{stroke:#2f4560}50%{stroke:#ff6b00}}
 @media (prefers-reduced-motion:reduce){.comb .cg,.comb .ck,.comb .gm{transition:none}.comb .goal polygon:not(.on){animation:none;stroke:#ff6b00}}
+</style>
+<style>/* Leistung */
+#bg{contain:strict;will-change:transform}
+.igrid{contain:strict}
 </style>
 </head>
 <body>
@@ -2119,7 +2126,7 @@ function igrid(){var sv=$('igsv'),cr=card.getBoundingClientRect(),W=cr.width,H=c
   var x=col*dx+(row%2?dx/2:0),y=row*dy,ex=Math.min(x,W-x,y,H-y),fade=Math.max(0,Math.min(1,ex/(r*3.2)));
   var op=.3+.7*fade,ev=Math.min(Math.pow((x-VX)/VW,2)+Math.pow((y-VY)/VH,2),Math.pow((x-SX)/SW,2)+Math.pow((y-SY)/SH,2)),k=Math.max(0,Math.min(1,(ev-.3)/1.0)),pk='rgb('+[[90,46,18],[230,98,8]].reduce(function(a,b){return [0,1,2].map(function(i){return Math.round(a[i]+(b[i]-a[i])*k)})}).join(',')+')';
   var bd=Math.hypot(x-cx,(y-cy)*1.5),bt=Math.pow(Math.max(0,1-bd/(W<600?210:280)),1.4)*.75,bs='rgb('+[0,1,2].map(function(i){return Math.round([29,48,73][i]+([255,107,0][i]-[29,48,73][i])*bt)}).join(',')+')';
-  out+='<polygon points="'+hexPts(x,y,r-1.5)+'" style="opacity:'+op.toFixed(2)+';--pk:'+pk+';--bs:'+bs+';--fd:'+Math.min(.15,Math.hypot(x-cx,y-cy)/Math.hypot(W,H)*.3).toFixed(3)+'s;--wd:'+(Math.hypot(x-cx,y-cy)/500).toFixed(3)+'s"/>';}
+  var wN=Math.hypot(x-cx,y-cy)<(W<600?230:320);out+='<polygon'+(wN?' class="w"':'')+' points="'+hexPts(x,y,r-1.5)+'" style="opacity:'+op.toFixed(2)+';--pk:'+pk+';--bs:'+bs+';--fd:'+Math.min(.15,Math.hypot(x-cx,y-cy)/Math.hypot(W,H)*.3).toFixed(3)+'s;--wd:'+(Math.hypot(x-cx,y-cy)/500).toFixed(3)+'s"/>';}
  var cs=card.style,px=function(v){return Math.round(v)+'px'};
  cs.setProperty('--vx',px(VX));cs.setProperty('--vy',px(VY));cs.setProperty('--vw',px(VW));cs.setProperty('--vh',px(VH));cs.setProperty('--sx',px(SX));cs.setProperty('--sy',px(SY));cs.setProperty('--sw',px(SW));cs.setProperty('--sh',px(SH));
  sv.setAttribute('viewBox','0 0 '+W+' '+H);sv.innerHTML=out}
@@ -2143,7 +2150,7 @@ var vr;addEventListener('resize',function(){if(kb())return;vw0=innerWidth;vh0=in
 var VV=window.visualViewport;
 function isTx(el){return !!el&&/^(INPUT|TEXTAREA)$/.test(el.tagName)&&el.type!=='checkbox'}
 function scP(el){for(var p=el.parentElement;p&&p!==card;p=p.parentElement){var o=getComputedStyle(p).overflowY;if((o==='auto'||o==='scroll')&&p.scrollHeight>p.clientHeight+1)return p}return byId[cur]}
-function keepVis(){var el=d.activeElement;if(!isTx(el))return;var kh=VV?Math.max(0,Math.round(innerHeight-VV.height-VV.offsetTop)):0;d.body.classList.toggle('kbo',kh>80);card.style.setProperty('--kb',(kh>80?kh:0)+'px');
+function keepVis(){var el=d.activeElement;if(!isTx(el))return;var kh=VV?Math.max(0,Math.round(innerHeight-VV.height-VV.offsetTop)):0;d.body.classList.toggle('kbo',kh>80);var kbv=(kh>80?kh:0)+'px';if(card.style.getPropertyValue('--kb')!==kbv)card.style.setProperty('--kb',kbv);
  var top=VV?VV.offsetTop:0,bot=top+(VV?VV.height:innerHeight),r=el.getBoundingClientRect(),dy=r.bottom+14>bot?r.bottom+14-bot:r.top-10<top?r.top-10-top:0;if(dy){var p=scP(el);if(p)p.scrollTop+=dy}}
 [].forEach.call(d.querySelectorAll('input,textarea'),function(el){if(!isTx(el))return;el.addEventListener('focus',function(){setTimeout(keepVis,60);setTimeout(keepVis,380)});
  el.addEventListener('blur',function(){setTimeout(function(){if(!isTx(d.activeElement)){d.body.classList.remove('kbo');card.style.setProperty('--kb','0px')}},120)})});
@@ -2219,7 +2226,8 @@ function ui(){b2cSync();
  kmSync();
  $('foot').style.visibility=cur==='intro'||cur==='done'||cur==='fin'||cur==='ladeB'?'hidden':'visible';footSync(hid);
 }
-function footSync(){var nb=$('next'),hid=nb.style.visibility==='hidden'||nb.classList.contains('nh');var fh=$('foot').offsetHeight;if(fh&&!card.classList.contains('nofs'))card.style.setProperty('--fh',(fh+14)+'px');var bk=$('back'),bh=bk.hidden||getComputedStyle(bk).display==='none'||bk.style.visibility==='hidden',noF=cur==='intro'||cur==='done'||cur==='fin'||cur==='ladeB';card.classList.toggle('nof',noF||hid&&bh);card.classList.toggle('nofs',!noF&&hid&&!bh);var st=byId[cur];if(st){var pb=noF||hid&&bh?'':hid?'46px':(fh+14)+'px';var sp=pb||'0px';if(st.style.getPropertyValue('--sp')!==sp){st.style.setProperty('--sp',sp);st.style.paddingBottom=pb?'0px':''}}}   // v18 Etappe 1: Abstand als Abstandhalter (::after) statt padding-bottom – iOS-Safari ignoriert padding-bottom in Flex-Scrollbereichen, nach dem Loslassen (Gummiband) rutschte das letzte Element unter die Leiste   // v18: Abstand nur am aktiven Schritt – der ausblendende behält seinen, kein Layout-Sprung   // v18 A: ohne Weiter-Button keine Leiste, Scrollbereich nutzt volle Höhe
+function footSyncSpaeter(){if(footSyncSpaeter.p)return;footSyncSpaeter.p=1;requestAnimationFrame(function(){footSyncSpaeter.p=0;footSync()})}
+function footSync(){var nb=$('next'),hid=nb.style.visibility==='hidden'||nb.classList.contains('nh');var fh=$('foot').offsetHeight;if(fh&&!card.classList.contains('nofs')){var fv=(fh+14)+'px';if(card.style.getPropertyValue('--fh')!==fv)card.style.setProperty('--fh',fv)}var bk=$('back'),bh=bk.hidden||getComputedStyle(bk).display==='none'||bk.style.visibility==='hidden',noF=cur==='intro'||cur==='done'||cur==='fin'||cur==='ladeB';card.classList.toggle('nof',noF||hid&&bh);card.classList.toggle('nofs',!noF&&hid&&!bh);var st=byId[cur];if(st){var pb=noF||hid&&bh?'':hid?'46px':(fh+14)+'px';var sp=pb||'0px';if(st.style.getPropertyValue('--sp')!==sp){st.style.setProperty('--sp',sp);st.style.paddingBottom=pb?'0px':''}}}   // v18 Etappe 1: Abstand als Abstandhalter (::after) statt padding-bottom – iOS-Safari ignoriert padding-bottom in Flex-Scrollbereichen, nach dem Loslassen (Gummiband) rutschte das letzte Element unter die Leiste   // v18: Abstand nur am aktiven Schritt – der ausblendende behält seinen, kein Layout-Sprung   // v18 A: ohne Weiter-Button keine Leiste, Scrollbereich nutzt volle Höhe
 /* Rückfragen zeigen nur gewählte Optionen; Überschriften nennen das Angebot, solange sie kurz genug bleiben */
 function only(key,src,keep){var g=d.querySelector('[data-key="'+key+'"]'),vals=ans[src]||[],first=null;
  [].forEach.call(g.children,function(t){var on=vals.indexOf(t.dataset.v)>-1||t.dataset.v===keep;t.hidden=!on;if(on&&!first)first=t});
@@ -3027,7 +3035,7 @@ function kpZgJe(z){try{var pre=(z.vorauswahl||[]),fin=[].concat((z.neu&&z.neu.bu
 var kpLast={id:'',email:''};   // v18 Wix P8: Lead-ID bei erneutem Senden (gleiche E-Mail) behalten
 function submit(){msg('');if(!chk())return;setBusy(true);var em0=$('email').value.trim().toLowerCase();reqId=kpLast.id&&kpLast.email===em0?kpLast.id:'kp'+Date.now()+Math.random().toString(36).slice(2,7);kpLast={id:reqId,email:em0};
  var a=answers(),r,web=$('web').value.trim();if(web)a.website=web.slice(0,120);r=K.evaluate(a);a.persona=r.persona;if(r.personaNeben)a.personaNeben=r.personaNeben;a.herkunft=herkunft(a,r);
- var data={pfad:a.pfad,answers:a,result:r,website:a.website||'',wunschkunden:a.wunschkunden||'',name:$('name').value.trim(),firma:$('firma').value.trim(),email:$('email').value.trim(),telefon:telV(),consent:true,tendenzVorher:prev?(prev.passt?prev.potenzial+' · Paket '+prev.paket:'passt nicht'):'',page:d.referrer||'',formVersion:'v18.2-gh',
+ var data={pfad:a.pfad,answers:a,result:r,website:a.website||'',wunschkunden:a.wunschkunden||'',name:$('name').value.trim(),firma:$('firma').value.trim(),email:$('email').value.trim(),telefon:telV(),consent:true,tendenzVorher:prev?(prev.passt?prev.potenzial+' · Paket '+prev.paket:'passt nicht'):'',page:d.referrer||'',formVersion:'v18.3-gh',
   rueckruf:$('rr').checked?{gewuenscht:true,zeitfenster:ans.rueckrufZeit||''}:null,antwortformat:$('rr').checked?'Telefon':'Mail',
   leadId:reqId,zeitstempel:kpNow(),fokusKernbereichName:a.fokusKernbereich?kpNm(a.fokusKernbereich):'',
   zielgruppeKlartext:a.zielgruppe?{vorauswahlNamen:(a.zielgruppe.vorauswahl||[]).map(kpNm),endauswahlNamen:a.zielgruppe.namen||[],je:kpZgJe(a.zielgruppe),vorauswahlGeaendert:!!a.zielgruppe.vorauswahlGeaendert,groesseVorbelegt:!!a.zielgruppe.groesseVorbelegt}:null,
@@ -3179,9 +3187,9 @@ function doneTexte(){var rr=$('rr').checked,z={Vormittags:'am Vormittag',Nachmit
  var a=answers();$('vtS').innerHTML=KPSatz.satz({anlass:ans.anlass,hauptziel:ans.hauptziel,prioritaet:ans.prioritaet,anlassText:a.anlassText,zielFreitext:a.zielFreitext,b2c:isB2C()}).html;
  $('vt').hidden=!(result&&result.passt)}
 function upd(fin){if(!LEAD)return;var a=answers();a.pfad='genau';var r=K.evaluate(a);a.persona=r.persona;if(r.personaNeben)a.personaNeben=r.personaNeben;
- var U={type:'kp-lead-update',id:LEAD,data:{answers:a,result:r,vertiefung:{letzterSchritt:cur,letzterSchrittTitel:(byId[cur]&&(byId[cur].querySelector('h2')||{}).textContent||'').trim(),abgeschlossen:!!fin},tendenzNeu:{ueberschrift:r.potenzial||'',paket:r.paket||'',text:kpTendenzText(a)},satz:kpSatz(a),formVersion:'v18.2-gh',zeitstempel:kpNow(),seq:(upd.n=(upd.n||0)+1)}};if(KP_TESTMODUS)console.info('[TESTMODUS] kp-lead-update simuliert, nichts gesendet',U);else try{kpSend(U)}catch(e){}ev('vertiefung',{schritt:cur,fertig:!!fin})}
+ var U={type:'kp-lead-update',id:LEAD,data:{answers:a,result:r,vertiefung:{letzterSchritt:cur,letzterSchrittTitel:(byId[cur]&&(byId[cur].querySelector('h2')||{}).textContent||'').trim(),abgeschlossen:!!fin},tendenzNeu:{ueberschrift:r.potenzial||'',paket:r.paket||'',text:kpTendenzText(a)},satz:kpSatz(a),formVersion:'v18.3-gh',zeitstempel:kpNow(),seq:(upd.n=(upd.n||0)+1)}};if(KP_TESTMODUS)console.info('[TESTMODUS] kp-lead-update simuliert, nichts gesendet',U);else try{kpSend(U)}catch(e){}ev('vertiefung',{schritt:cur,fertig:!!fin})}
 $('vtJa').addEventListener('click',function(){ans.vertiefen=true;ans.pfad='genau';show('angebot2')});
-$('vtNein').addEventListener('click',function(){svClear();if(LEAD){var U7={type:'kp-lead-update',id:LEAD,data:{vertiefung:{abgelehnt:true},satz:kpSatz(answers()),formVersion:'v18.2-gh',zeitstempel:kpNow()}};if(KP_TESTMODUS)console.info('[TESTMODUS] kp-lead-update (nein) simuliert, nichts gesendet',U7);else try{kpSend(U7)}catch(e){}}   /* v18 Wix P7 */SV.off=true;$('vt').innerHTML='<p class="small">Alles klar – Ihre Ersteinschätzung erhalten Sie '+'innerhalb von 24 Stunden (werktags).</p>';ev('vertiefung_nein',{})});
+$('vtNein').addEventListener('click',function(){svClear();if(LEAD){var U7={type:'kp-lead-update',id:LEAD,data:{vertiefung:{abgelehnt:true},satz:kpSatz(answers()),formVersion:'v18.3-gh',zeitstempel:kpNow()}};if(KP_TESTMODUS)console.info('[TESTMODUS] kp-lead-update (nein) simuliert, nichts gesendet',U7);else try{kpSend(U7)}catch(e){}}   /* v18 Wix P7 */SV.off=true;$('vt').innerHTML='<p class="small">Alles klar – Ihre Ersteinschätzung erhalten Sie '+'innerhalb von 24 Stunden (werktags).</p>';ev('vertiefung_nein',{})});
 
 /* ===================== v16 (d): Nachsende-Karte vor dem Ende des Detailpfads, Karte wird zum E-Mail-Symbol und fliegt weg ===================== */
 function nsProfil(){var a=answers(),L=[],add=function(k,v){if(v&&String(v).trim())L.push('<div class="vr"><dt>'+esc(k)+'</dt><dd>'+v+'</dd></div>')},
@@ -3254,7 +3262,7 @@ function svGo(S){try{svApply(S)}catch(e){kpHeal('svApply '+e.message)}var to=S.c
  $('wbJa').addEventListener('click',function(){zu();svGo(S)});
  $('wbNeu').addEventListener('click',function(){svClear();zu();setTimeout(function(){try{st0.focus({preventScroll:true})}catch(e){}},40)});
  st0.addEventListener('click',function(){if(!wb.hidden&&!wb.classList.contains('zu')){svClear();zu()}},true)})();
-try{new MutationObserver(function(){footSync()}).observe($('next'),{attributes:true,attributeFilter:['style','class']});new MutationObserver(function(){footSync()}).observe($('back'),{attributes:true,attributeFilter:['style','class','hidden']})}catch(e){}
+try{new MutationObserver(function(){footSyncSpaeter()}).observe($('next'),{attributes:true,attributeFilter:['style','class']});new MutationObserver(function(){footSyncSpaeter()}).observe($('back'),{attributes:true,attributeFilter:['style','class','hidden']})}catch(e){}
 var ui0=ui;ui=function(){ui0.apply(this,arguments);svQ()};
 addEventListener('pagehide',function(){if(SV.q)svSave()});d.addEventListener('visibilitychange',function(){if(d.hidden&&SV.q)svSave()});
 /* ===================== v17: dezentes Feedback auf der letzten Danke-Seite (1–5 Sechsecke + optionaler Freitext) → kp-lead-update (feedback), gleiche Lead-ID ===================== */
@@ -3267,7 +3275,7 @@ $('fbH').addEventListener('mouseleave',function(){fbPaint()});
 $('fbH').addEventListener('keydown',function(e){var m={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1}[e.key];if(!m)return;e.preventDefault();var n=Math.min(5,Math.max(1,(FB.n||0)+m));fbSet(n);$('fbH').children[n-1].focus()});
 function fbClean(t){return String(t||'').replace(/<[^>]*>/g,'').replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g,'').replace(/[ \t]+/g,' ').trim().slice(0,600)}
 $('fbGo').addEventListener('click',function(){if(FB.sent||!FB.n)return;FB.sent=1;
- var U={type:'kp-lead-update',id:LEAD,data:{feedback:{bewertung:FB.n,skala:5,text:fbClean($('fbT').value),formVersion:'v18.2-gh',zeitstempel:kpNow()}}};
+ var U={type:'kp-lead-update',id:LEAD,data:{feedback:{bewertung:FB.n,skala:5,text:fbClean($('fbT').value),formVersion:'v18.3-gh',zeitstempel:kpNow()}}};
  if(KP_TESTMODUS)console.info('[TESTMODUS] kp-lead-update (feedback) simuliert, nichts gesendet',U);else try{kpSend(U)}catch(e){}
  ev('feedback',{bewertung:FB.n});$('fbM').hidden=true;$('fbH').classList.add('fbz');[].forEach.call($('fbH').children,function(b){b.disabled=true});$('fbOk').hidden=false});
 /* v15 TESTMODUS: Leiste mit Schritt-Sprung (nur wenn KP_TESTMODUS = true) */
@@ -3499,5 +3507,6 @@ svg.km path{filter:url(#kpInM)}
 .lwabe .lwf,.lwabe .lwf{fill:url(#kpGO);stroke:rgba(255,226,204,.42);stroke-width:1;filter:none}
 .lwF{filter:url(#kpLd)}
 .lwabe .lwo{fill:url(#kpGS);stroke:rgba(245,240,235,.16);stroke-width:1}
-</style></body>
+</style><script>(function(){var c=document.getElementById("card"),h=document.documentElement;if(!c)return;function u(){h.classList.toggle("kp-intro",c.classList.contains("intro-on"))}u();new MutationObserver(u).observe(c,{attributes:true,attributeFilter:["class"]})})();</script>
+</body>
 </html>
