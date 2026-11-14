@@ -40,7 +40,7 @@ if(!KP_TESTMODUS&&!KP_WEBHOOK&&window.parent===window){KP_TESTMODUS=true;try{con
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0B1521;--card:#141F2B;--line:rgba(138,166,204,.16);--o:#ff6b00;--l:#f5f0eb;--m:#9fb2c8;--b:#3d7bd9;--b2:#1c2d42}
-html,body{height:100%;overflow:hidden;background:var(--card);color:var(--l);font:15px/1.45 "Segoe UI",Inter,system-ui,-apple-system,Arial,sans-serif;-webkit-text-size-adjust:100%}
+html,body{height:100%;overflow:hidden;background:var(--card);color:var(--l);font:15px/1.45 "Archivo","Segoe UI",Inter,system-ui,-apple-system,Arial,sans-serif;-webkit-text-size-adjust:100%}
 #bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .wrap{position:relative;z-index:1;height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
 .card{position:relative;width:100%;max-width:760px;height:100%;max-height:600px;background:#0B1521;border:1px solid rgba(138,166,204,.16);border-radius:20px;box-shadow:0 30px 80px rgba(2,8,16,.55),inset 0 1px 0 rgba(255,255,255,.04);display:flex;flex-direction:column;padding:26px 30px 22px;overflow:hidden}
@@ -1192,6 +1192,7 @@ svg.rdo path{fill:#ff6b00;stroke:#ff6b00;stroke-width:2;filter:none}svg.rdo{filt
 <svg id="bg" aria-hidden="true"></svg>
 <div class="wrap">
 <main class="card intro-on" id="card" aria-labelledby="kick">
+<script>if(/[?&]start=1(&|$)/.test(location.search))document.getElementById("card").classList.add("direkt")</script>
  <div class="igrid" aria-hidden="true"><svg id="igsv"></svg></div><div class="ivig" aria-hidden="true"></div>
  <div class="top">
   <div><div class="kicker" id="kick">Exklusivitäts-Check</div><div class="stepno" id="stepno" aria-live="polite">Schritt 1</div></div>
@@ -2126,7 +2127,7 @@ function igrid(){var sv=$('igsv'),cr=card.getBoundingClientRect(),W=cr.width,H=c
   var x=col*dx+(row%2?dx/2:0),y=row*dy,ex=Math.min(x,W-x,y,H-y),fade=Math.max(0,Math.min(1,ex/(r*3.2)));
   var op=.3+.7*fade,ev=Math.min(Math.pow((x-VX)/VW,2)+Math.pow((y-VY)/VH,2),Math.pow((x-SX)/SW,2)+Math.pow((y-SY)/SH,2)),k=Math.max(0,Math.min(1,(ev-.3)/1.0)),pk='rgb('+[[90,46,18],[230,98,8]].reduce(function(a,b){return [0,1,2].map(function(i){return Math.round(a[i]+(b[i]-a[i])*k)})}).join(',')+')';
   var bd=Math.hypot(x-cx,(y-cy)*1.5),bt=Math.pow(Math.max(0,1-bd/(W<600?210:280)),1.4)*.75,bs='rgb('+[0,1,2].map(function(i){return Math.round([29,48,73][i]+([255,107,0][i]-[29,48,73][i])*bt)}).join(',')+')';
-  var wN=Math.hypot(x-cx,y-cy)<(W<600?230:320);out+='<polygon'+(wN?' class="w"':'')+' points="'+hexPts(x,y,r-1.5)+'" style="opacity:'+op.toFixed(2)+';--pk:'+pk+';--bs:'+bs+';--fd:'+Math.min(.15,Math.hypot(x-cx,y-cy)/Math.hypot(W,H)*.3).toFixed(3)+'s;--wd:'+(Math.hypot(x-cx,y-cy)/500).toFixed(3)+'s"/>';}
+  var wN=Math.hypot(x-cx,y-cy)<(W<600?230:320);out+='<polygon'+(wN?' class="w"':'')+' points="'+hexPts(x,y,r-1.5)+'" style="opacity:'+op.toFixed(2)+';--pk:'+pk+';--bs:'+bs+';--fd:'+Math.min(.15,Math.hypot(x-cx,y-cy)/Math.hypot(W,H)*.3).toFixed(3)+'s;--wd:'+(Math.hypot(x-cx,y-cy)/500).toFixed(3)+'s;--od:'+(Math.hypot(x-cx,y-cy)/1500).toFixed(3)+'s"/>';}
  var cs=card.style,px=function(v){return Math.round(v)+'px'};
  cs.setProperty('--vx',px(VX));cs.setProperty('--vy',px(VY));cs.setProperty('--vw',px(VW));cs.setProperty('--vh',px(VH));cs.setProperty('--sx',px(SX));cs.setProperty('--sy',px(SY));cs.setProperty('--sw',px(SW));cs.setProperty('--sh',px(SH));
  sv.setAttribute('viewBox','0 0 '+W+' '+H);sv.innerHTML=out}
@@ -3262,6 +3263,18 @@ function svGo(S){try{svApply(S)}catch(e){kpHeal('svApply '+e.message)}var to=S.c
  $('wbJa').addEventListener('click',function(){zu();svGo(S)});
  $('wbNeu').addEventListener('click',function(){svClear();zu();setTimeout(function(){try{st0.focus({preventScroll:true})}catch(e){}},40)});
  st0.addEventListener('click',function(){if(!wb.hidden&&!wb.classList.contains('zu')){svClear();zu()}},true)})();
+/* Aufruf von der Website (?start=1): Der Start-Knopf wirkt wie gerade gedrückt (Impuls), das Formular öffnet sich von selbst.
+   Gibt es einen gespeicherten Stand, bleibt die Frage „Weitermachen?“ stehen. */
+(function(){if(!/[?&]start=1(&|$)/.test(location.search))return;
+ if(!$('wb').hidden||cur!=='intro'){card.classList.remove('direkt');return}
+ clearTimeout(lt);if(RM()){card.classList.remove('direkt');st0.click();return}
+ var n=0;(function warte(){if(cur!=='intro'){card.classList.remove('direkt');return}
+  if(!built&&n++<60){setTimeout(warte,50);return}
+  clearTimeout(lt);clearTimeout(wt);card.classList.remove('pz','wv','lit');
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+   card.classList.add('auf');
+   setTimeout(function(){try{show('region')}catch(e){card.classList.remove('direkt','auf')}},480);
+   setTimeout(function(){card.classList.remove('auf','direkt')},1500)})})})()})();
 try{new MutationObserver(function(){footSyncSpaeter()}).observe($('next'),{attributes:true,attributeFilter:['style','class']});new MutationObserver(function(){footSyncSpaeter()}).observe($('back'),{attributes:true,attributeFilter:['style','class','hidden']})}catch(e){}
 var ui0=ui;ui=function(){ui0.apply(this,arguments);svQ()};
 addEventListener('pagehide',function(){if(SV.q)svSave()});d.addEventListener('visibilitychange',function(){if(d.hidden&&SV.q)svSave()});
@@ -3507,6 +3520,26 @@ svg.km path{filter:url(#kpInM)}
 .lwabe .lwf,.lwabe .lwf{fill:url(#kpGO);stroke:rgba(255,226,204,.42);stroke-width:1;filter:none}
 .lwF{filter:url(#kpLd)}
 .lwabe .lwo{fill:url(#kpGS);stroke:rgba(245,240,235,.16);stroke-width:1}
+
+/* Angleichung an die Website (14.11.2026): Schrift Archivo wie auf kreitmayr-and-partners.com, Datei archivo.woff2 liegt neben index.html */
+@font-face{font-family:"Archivo";src:url("archivo.woff2") format("woff2");font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+body{font-stretch:104%}
+button,input,select,textarea{font-family:inherit;font-stretch:inherit}
+/* Wabenraster der Startansicht: läuft nach allen vier Seiten weich aus, keine harte Kante mehr */
+.igrid,.ivig{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 16%,#000 84%,transparent 100%),linear-gradient(to right,transparent 0,#000 14%,#000 86%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,transparent 0,#000 16%,#000 84%,transparent 100%),linear-gradient(to right,transparent 0,#000 14%,#000 86%,transparent 100%);mask-composite:intersect}
+/* Karte in der Startansicht: ihr Grund läuft zu den Rändern hin aus, damit das Wabenmuster der Seite ohne Kante durchscheint */
+.card{transition:background-color .32s var(--ez),border-color .32s var(--ez),box-shadow .32s var(--ez)}
+.card.intro-on{background-color:transparent}
+.card.intro-on::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:#0B1521;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 22%,#000 78%,transparent 100%),linear-gradient(to right,transparent 0,#000 22%,#000 78%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,transparent 0,#000 22%,#000 78%,transparent 100%),linear-gradient(to right,transparent 0,#000 22%,#000 78%,transparent 100%);mask-composite:intersect}
+
+/* Aufruf von der Website (?start=1): Die Start-Ansicht steht dort am Seitenende. Hier beginnt es mit dem leuchtenden Raster,
+   die Waben öffnen sich von der Mitte nach außen und geben den ersten Schritt frei. */
+.card.direkt .intro .itx,.card.direkt .intro .ism,.card.direkt .intro .ctaz{opacity:0!important;transition:none!important;pointer-events:none}
+.card.direkt .ivig{opacity:0!important;transition:none!important}
+.card.direkt .igrid{opacity:1!important}
+.card.direkt .igrid polygon{stroke:#ff8a33;transition:none}
+.card.auf .igrid polygon{animation:auf .66s cubic-bezier(.5,0,.2,1) var(--od,0s) both}
+@keyframes auf{0%{transform:none;stroke:#ff8a33}28%{transform:scale(1.14);stroke:#ffc79a;opacity:1}100%{transform:scale(.12) rotate(60deg);stroke:#ff8a33;opacity:0}}
 </style><script>(function(){var c=document.getElementById("card"),h=document.documentElement;if(!c)return;function u(){h.classList.toggle("kp-intro",c.classList.contains("intro-on"))}u();new MutationObserver(u).observe(c,{attributes:true,attributeFilter:["class"]})})();</script>
 </body>
 </html>
