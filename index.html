@@ -2146,6 +2146,17 @@ function paint(){built=true;if(!dirty)return;dirty=false;bg();igrid()}
 function setVis(v){v=v&&!d.hidden;if(v===VIS)return;VIS=v;d.body.classList.toggle('paused',!v);
  if(v){paint();if(cur==='intro')loop(900)}else{clearTimeout(lt);clearTimeout(wt);card.classList.remove('pz','wv')}}
 var vr;addEventListener('resize',function(){if(kb())return;vw0=innerWidth;vh0=innerHeight;lockH();dirty=true;clearTimeout(vr);vr=setTimeout(function(){if(VIS)paint();fitRes()},150)});
+/* 14.11.2026: Höhe am Handy verlässlich. Die Höhe wurde bisher einmal beim Laden gemessen; blendet der Browser seine Leisten erst danach ein
+   (Aufruf von der Website, In-App-Browser) und bleibt das resize-Ereignis aus, war das Formular unten abgeschnitten.
+   Jetzt: sichtbare Höhe (visualViewport) als Maß, Nachmessen kurz nach dem Laden, bei pageshow, Drehen und jeder Änderung der sichtbaren Fläche.
+   Bei offener Bildschirmtastatur bleibt alles wie bisher (Höhe fest). */
+function hSync(){var a=d.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=='checkbox')return;
+ var h=innerHeight,v=window.visualViewport;if(v&&Math.abs((v.scale||1)-1)<.01)h=Math.min(h,Math.round(v.height+v.offsetTop));if(!(h>200))return;
+ if(h===vh0&&innerWidth===vw0)return;vw0=innerWidth;vh0=h;lockH();dirty=true;clearTimeout(vr);vr=setTimeout(function(){if(VIS)paint();try{fitRes()}catch(e){}},150)}
+hSync();[60,250,600,1200,2500,5000].forEach(function(t){setTimeout(hSync,t)});
+addEventListener('pageshow',hSync);addEventListener('orientationchange',function(){setTimeout(hSync,250);setTimeout(hSync,700)});
+if(window.visualViewport)window.visualViewport.addEventListener('resize',hSync);
+d.addEventListener('focusout',function(){setTimeout(hSync,350)});
 /* v9.2 (B): Bildschirmtastatur – das fokussierte Feld bleibt sichtbar. Über visualViewport wird die Tastaturhöhe gemessen; der aktive Schritt
    bekommt so viel Innenabstand unten und scrollt selbst (kein Springen der Seite, keine fixierten Elemente, die mitwandern). */
 var VV=window.visualViewport;
