@@ -3009,7 +3009,7 @@ function next(){if(busy||FW||!valid())return;if(TZ2&&cur==='result'){TZ2=false;r
  if(RET&&cur!=='result'){if(!(n&&byId[n].dataset.parent===RET)){RET=null;return show('result')}}   // v9.2 (R): nach „ändern“ direkt zur neuen Auswertung
  if(n==='ladeB')return loadB();if(!RET&&parentOf(cur)==='region'&&n==='branche'&&kmx(function(){KMO=1;show(n);KMO=0}))return;show(n)}
 $('next').addEventListener('click',function(e){var F=$('f');if(cur==='kontakt'&&F.requestSubmit&&!busy){try{F.requestSubmit();return}catch(x){}}next(e)});   // v18 B: echtes submit-Ereignis, damit Chrome/Safari Kontakt speichern anbieten
-addEventListener('pointerdown',function(){d.body.classList.add('ptr')},true);addEventListener('keydown',function(e){if(e.key==='Tab'||e.key.indexOf('Arrow')===0||e.key===' '||e.key==='Enter')d.body.classList.remove('ptr')},true);
+addEventListener('pointerdown',function(){d.body.classList.add('ptr')},true);/* 14.11.2026: Kein Fokus-Ring um die erste Kachel, wenn das Formular von der Website aus (?start=1) oder am Touch-Gerät geöffnet wird; mit Tab/Pfeiltasten erscheint er wieder. */if(/[?&]start=1(&|$)/.test(location.search)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))d.body.classList.add('ptr');addEventListener('keydown',function(e){if(e.key==='Tab'||e.key.indexOf('Arrow')===0||e.key===' '||e.key==='Enter')d.body.classList.remove('ptr')},true);
 $('nudgeJa').addEventListener('click',function(){prev=result;ans.pfad='genau';ans.nachtraeglichGenau=true;var t=byId.weg.querySelector('[data-v=genau]');if(t)t.click();show('d1')});
 $('nudgeNein').addEventListener('click',function(){show('kontakt')});
 var st0=$('start'),hov=false,lt,wt,RM=function(){return matchMedia('(prefers-reduced-motion: reduce)').matches};
@@ -3551,6 +3551,13 @@ button,input,select,textarea{font-family:inherit;font-stretch:inherit}
 .card.direkt .igrid polygon{stroke:#ff8a33;transition:none}
 .card.auf .igrid polygon{animation:auf .66s cubic-bezier(.5,0,.2,1) var(--od,0s) both}
 @keyframes auf{0%{transform:none;stroke:#ff8a33}28%{transform:scale(1.14);stroke:#ffc79a;opacity:1}100%{transform:scale(.12) rotate(60deg);stroke:#ff8a33;opacity:0}}
+
+/* 14.11.2026: „Angaben ändern“ auf der Karte „Ihre Angaben“ als Neben-Schaltfläche im Stil der übrigen (Form, innere Schatten, kein äußeres Leuchten, kein unterstrichener Text) */
+.vk .kpE{display:flex;align-items:center;justify-content:center;width:max-content;max-width:100%;margin:18px 0 0 auto;min-height:44px;padding:0 22px;border:1px solid rgba(245,240,235,.12);border-radius:999px;background:#16263a;color:#f5f0eb;-webkit-text-fill-color:#f5f0eb;font-weight:700;font-size:14px;letter-spacing:0;text-decoration:none;text-shadow:0 1px 1px rgba(0,0,0,.5);box-shadow:inset 0 1px 0 #ffffff33,inset 0 -2px 0 #0003,0 1px 2px #0006}
+.vk .kpE:hover{border-color:rgba(255,107,0,.45);box-shadow:inset 0 1px 0 #ffffff4d,inset 0 -2px 0 #0003,0 1px 2px #0006,0 8px 18px -10px #000c}
+.vk .kpE:active{scale:.97}
+.vk .kpE[aria-expanded=true]{border-color:rgba(255,107,0,.55);box-shadow:inset 0 0 0 1px rgba(255,107,0,.35),inset 0 1px 0 rgba(255,214,180,.30),inset 0 -2px 0 #0003,0 1px 2px #0006}
+@media (max-width:600px){.vk .kpE{width:100%}}
 </style><script>(function(){var c=document.getElementById("card"),h=document.documentElement;if(!c)return;function u(){h.classList.toggle("kp-intro",c.classList.contains("intro-on"))}u();new MutationObserver(u).observe(c,{attributes:true,attributeFilter:["class"]})})();</script>
 </body>
 </html>
